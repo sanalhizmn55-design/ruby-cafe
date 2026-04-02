@@ -3,69 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruby Admin | Yönetim</title>
+    <title>Ruby Admin | Yönetim & Siparişler</title>
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; color: #1b4332; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f8f9fa; color: #1b4332; padding: 10px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; margin-bottom: 20px; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
         button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .list-item { background: white; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; }
+        .order-card { background: #fff; border-left: 5px solid #2d6a4f; margin-top: 10px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .item-list { border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; }
+        .delete-btn { background: #e63946; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="text-align: center;">Ruby Admin</h2>
+    <h2 style="text-align: center;">Ürün Ekle</h2>
     <input type="text" id="pName" placeholder="Ürün Adı">
     <select id="pCat">
-        <option value="Sıcak İçecekler">Sıcak İçecekler</option>
-        <option value="Soğuk İçecekler">Soğuk İçecekler</option>
-        <option value="Tatlılar">Tatlılar</option>
+        <option value="TATLILAR">TATLILAR</option>
+        <option value="BREAKFAST">BREAKFAST</option>
+        <option value="BURGERLER">BURGERLER</option>
+        <option value="SPAGHETTİ">SPAGHETTİ</option>
+        <option value="RUBY SPESCİAL">RUBY SPESCİAL</option>
+        <option value="STEAK">STEAK</option>
+        <option value="EKSTRALAR">EKSTRALAR</option>
+        <option value="COLD COFFEES">COLD COFFEES</option>
+        <option value="COCKTAIL TYPES">COCKTAIL TYPES</option>
+        <option value="ESPRESSOLAR">ESPRESSOLAR</option>
+        <option value="FİLTER COFFEES">FİLTER COFFEES</option>
+        <option value="HOT DRINKS">HOT DRINKS</option>
+        <option value="MILKSHAKE">MILKSHAKE</option>
+        <option value="FROZEN">FROZEN</option>
+        <option value="SOFT DRINKS">SOFT DRINKS</option>
+        <option value="SMOOTHIE RUBY">SMOOTHIE RUBY</option>
+        <option value="TÜRK KAHVESİ">TÜRK KAHVESİ</option>
+        <option value="HOOKAH">HOOKAH</option>
     </select>
-    <input type="text" id="pImg" placeholder="Görsel Linki (Boş kalabilir)">
+    <input type="text" id="pImg" placeholder="Görsel Linki">
     <button onclick="saveItem()">Menüye Ekle</button>
 </div>
 
-<div id="itemList" style="max-width: 400px; margin: 20px auto;"></div>
+<div id="ordersArea" style="max-width: 500px; margin: auto;">
+    <h2 style="text-align: center;">🔔 Gelen Siparişler</h2>
+    <div id="orderList"></div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR
-    const firebaseConfig = {
-        apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
-        authDomain: "rubycafemenu.firebaseapp.com",
-        projectId: "rubycafemenu",
-        storageBucket: "rubycafemenu.firebasestorage.app",
-        messagingSenderId: "770833665554",
-        appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb"
+    const firebaseConfig = {‎apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
+‎        authDomain: "rubycafemenu.firebaseapp.com",
+‎        projectId: "rubycafemenu",
+‎        storageBucket: "rubycafemenu.firebasestorage.app",
+‎        messagingSenderId: "770833665554",
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Ürün Kaydetme
     window.saveItem = async () => {
         const name = document.getElementById('pName').value;
         const cat = document.getElementById('pCat').value;
         const img = document.getElementById('pImg').value || "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=200";
         if(name) {
             await addDoc(collection(db, "menu"), { name, category: cat, image: img });
-            alert("Eklendi!");
+            alert("Ürün Menüye Eklelendi!");
             document.getElementById('pName').value = "";
         }
     };
 
-    onSnapshot(collection(db, "menu"), (snap) => {
-        const list = document.getElementById('itemList');
-        list.innerHTML = "<h4>Mevcut Ürünler</h4>";
+    // Siparişleri Dinleme
+    onSnapshot(query(collection(db, "orders"), orderBy("timestamp", "desc")), (snap) => {
+        const list = document.getElementById('orderList');
+        list.innerHTML = "";
         snap.forEach(d => {
-            const p = d.data();
-            list.innerHTML += `<div class="list-item"><span>${p.name} (${p.category})</span> <button onclick="deleteItem('${d.id}')" style="width:auto; padding:5px; background:red;">Sil</button></div>`;
+            const order = d.data();
+            const date = new Date(order.timestamp).toLocaleTimeString();
+            list.innerHTML += `
+                <div class="order-card">
+                    <strong>⏰ ${date} - Masa Siparişi</strong>
+                    <div class="item-list">${order.items.join(", ")}</div>
+                    <button class="delete-btn" onclick="completeOrder('${d.id}')">Tamamlandı / Sil</button>
+                </div>`;
         });
     });
 
-    window.deleteItem = async (id) => { if(confirm("Silinsin mi?")) await deleteDoc(doc(db, "menu", id)); };
+    window.completeOrder = async (id) => {
+        if(confirm("Sipariş teslim edildi mi?")) await deleteDoc(doc(db, "orders", id));
+    };
 </script>
 </body>
 </html>
