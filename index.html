@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby Cafe | QR Menü</title>
+    <style>
+        :root { --ruby-green: #1b4332; --soft-white: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--soft-white); color: var(--ruby-green); margin: 0; padding-bottom: 80px; }
+        header { background: var(--ruby-green); color: white; padding: 25px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .category-title { padding: 10px 20px; margin-top: 20px; background: #e9ecef; font-weight: bold; border-left: 5px solid var(--ruby-green); }
+        .product-card { background: white; margin: 15px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+        .product-card img { width: 80px; height: 80px; object-fit: cover; }
+        .product-info { padding: 10px; flex: 1; }
+        .add-btn { background: var(--ruby-green); color: white; border: none; padding: 8px 12px; border-radius: 20px; float: right; cursor: pointer; }
+        
+        /* Sepet Çubuğu */
+        #cart-bar { position: fixed; bottom: 0; width: 100%; background: var(--ruby-green); color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; display: none; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 1000; overflow-y: auto; }
+        .modal-header { background: var(--ruby-green); color: white; padding: 20px; display: flex; justify-content: space-between; }
+        .cart-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
+        .remove-btn { color: red; background: none; border: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 style="margin:0;">RUBY CAFE</h1>
+    <p style="margin:5px 0 0 0; opacity: 0.8;">Hoş Geldiniz</p>
+</header>
+
+<div id="menu-container">
+    </div>
+
+<div id="cart-bar" onclick="toggleCart(true)">
+    🛒 Sepete Git (<span id="cart-count">0</span> Ürün)
+</div>
+
+<div id="cart-modal" class="modal">
+    <div class="modal-header">
+        <h3>Sepetiniz</h3>
+        <button onclick="toggleCart(false)" style="color:white; background:none; border:none; font-size:20px;">✕</button>
+    </div>
+    <div id="cart-list"></div>
+    <div style="padding: 20px;">
+        <button onclick="confirmOrder()" style="width:100%; padding:15px; background:var(--ruby-green); color:white; border:none; border-radius:10px;">Siparişi Tamamla</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR (Admin sayfasındakiyle aynı)
+    const firebaseConfig = {
+‎  apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
+‎  authDomain: "rubycafemenu.firebaseapp.com",
+‎  projectId: "rubycafemenu",
+‎  storageBucket: "rubycafemenu.firebasestorage.app",
+‎  messagingSenderId: "770833665554",
+‎  appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb",
+‎  measurementId: "G-0LFDSHD923"
+‎};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let cart = [];
+
+    // Verileri Kategorize Et ve Göster
+    onSnapshot(collection(db, "menu"), (snapshot) => {
+        const container = document.getElementById('menu-container');
+        const groups = {};
+        snapshot.forEach(doc => {
+            const p = doc.data();
+            if(!groups[p.category]) groups[p.category] = [];
+            groups[p.category].push(p);
+        });
+
+        container.innerHTML = "";
+        for(let cat in groups) {
+            container.innerHTML += `<div class="category-title">${cat}</div>`;
+            groups[cat].forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.image}" alt="${p.name}">
+                        <div class="product-info">
+                            <span style="font-weight:bold;">${p.name}</span>
+                            <button class="add-btn" onclick="addToCart('${p.name}')">Ekle</button>
+                        </div>
+                    </div>`;
+            });
+        }
+    });
+
+    window.addToCart = (name) => {
+        cart.push(name);
+        renderCart();
+        document.getElementById('cart-bar').style.display = 'block';
+    };
+
+    window.renderCart = () => {
+        document.getElementById('cart-count').innerText = cart.length;
+        const list = document.getElementById('cart-list');
+        list.innerHTML = "";
+        cart.forEach((item, index) => {
+            list.innerHTML += `<div class="cart-item"><span>${item}</span><button class="remove-btn" onclick="removeItem(${index})">SİL</button></div>`;
+        });
+    };
+
+    window.removeItem = (index) => {
+        cart.splice(index, 1);
+        renderCart();
+        if(cart.length === 0) {
+            document.getElementById('cart-bar').style.display = 'none';
+            toggleCart(false);
+        }
+    };
+
+    window.toggleCart = (show) => {
+        document.getElementById('cart-modal').style.display = show ? 'block' : 'none';
+    };
+
+    window.confirmOrder = () => {
+        alert("Siparişiniz Hazırlanıyor!\nÜrünler: " + cart.join(", "));
+        cart = [];
+        renderCart();
+        toggleCart(false);
+        document.getElementById('cart-bar').style.display = 'none';
+    };
+</script>
+</body>
+</html>
