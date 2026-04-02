@@ -5,94 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruby Admin | Yönetim & Siparişler</title>
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; color: #1b4332; padding: 10px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; margin-bottom: 20px; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .order-card { background: #fff; border-left: 5px solid #2d6a4f; margin-top: 10px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .item-list { border-top: 1px dashed #ccc; margin-top: 10px; padding-top: 10px; }
-        .delete-btn { background: #e63946; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 10px; }
+        body { font-family: sans-serif; background: #f0f2f5; color: #1b4332; padding: 15px; margin: 0; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { text-align: center; margin-top: 0; color: #2d6a4f; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2d6a4f; }
+        .order-card { background: #fff; border-left: 6px solid #ffbc00; margin-top: 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
+        .order-time { font-size: 12px; color: #666; }
+        .order-items { font-weight: bold; margin: 10px 0; color: #333; font-size: 18px; }
+        .done-btn { background: #2a9d8f; width: auto; padding: 8px 15px; }
+        .delete-item-btn { background: #e63946; padding: 5px; font-size: 12px; width: auto; float: right; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="text-align: center;">Ürün Ekle</h2>
-    <input type="text" id="pName" placeholder="Ürün Adı">
-    <select id="pCat">
-        <option value="TATLILAR">TATLILAR</option>
-        <option value="BREAKFAST">BREAKFAST</option>
-        <option value="BURGERLER">BURGERLER</option>
-        <option value="SPAGHETTİ">SPAGHETTİ</option>
-        <option value="RUBY SPESCİAL">RUBY SPESCİAL</option>
-        <option value="STEAK">STEAK</option>
-        <option value="EKSTRALAR">EKSTRALAR</option>
-        <option value="COLD COFFEES">COLD COFFEES</option>
-        <option value="COCKTAIL TYPES">COCKTAIL TYPES</option>
-        <option value="ESPRESSOLAR">ESPRESSOLAR</option>
-        <option value="FİLTER COFFEES">FİLTER COFFEES</option>
-        <option value="HOT DRINKS">HOT DRINKS</option>
-        <option value="MILKSHAKE">MILKSHAKE</option>
-        <option value="FROZEN">FROZEN</option>
-        <option value="SOFT DRINKS">SOFT DRINKS</option>
-        <option value="SMOOTHIE RUBY">SMOOTHIE RUBY</option>
-        <option value="TÜRK KAHVESİ">TÜRK KAHVESİ</option>
-        <option value="HOOKAH">HOOKAH</option>
-    </select>
-    <input type="text" id="pImg" placeholder="Görsel Linki">
-    <button onclick="saveItem()">Menüye Ekle</button>
-</div>
+<div class="container">
+    <div class="card">
+        <h2>✨ Ürün Ekle</h2>
+        <input type="text" id="pName" placeholder="Ürün Adı (Örn: Ruby Steak)">
+        <select id="pCat">
+            <option value="TATLILAR">TATLILAR</option>
+            <option value="BREAKFAST">BREAKFAST</option>
+            <option value="BURGERLER">BURGERLER</option>
+            <option value="SPAGHETTİ">SPAGHETTİ</option>
+            <option value="RUBY SPESCİAL">RUBY SPESCİAL</option>
+            <option value="STEAK">STEAK</option>
+            <option value="EKSTRALAR">EKSTRALAR</option>
+            <option value="COLD COFFEES">COLD COFFEES</option>
+            <option value="COCKTAIL TYPES">COCKTAIL TYPES</option>
+            <option value="ESPRESSOLAR">ESPRESSOLAR</option>
+            <option value="FİLTER COFFEES">FİLTER COFFEES</option>
+            <option value="HOT DRINKS">HOT DRINKS</option>
+            <option value="MILKSHAKE">MILKSHAKE</option>
+            <option value="FROZEN">FROZEN</option>
+            <option value="SOFT DRINKS">SOFT DRINKS</option>
+            <option value="SMOOTHIE RUBY">SMOOTHIE RUBY</option>
+            <option value="TÜRK KAHVESİ">TÜRK KAHVESİ</option>
+            <option value="HOOKAH">HOOKAH</option>
+        </select>
+        <input type="text" id="pImg" placeholder="Görsel Linki (Opsiyonel)">
+        <button onclick="saveItem()">Menüye Ekle</button>
+    </div>
 
-<div id="ordersArea" style="max-width: 500px; margin: auto;">
-    <h2 style="text-align: center;">🔔 Gelen Siparişler</h2>
+    <h2>🔔 Gelen Siparişler</h2>
     <div id="orderList"></div>
+
+    <hr>
+    <h2>📦 Mevcut Menü</h2>
+    <div id="itemList"></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {‎apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
-‎        authDomain: "rubycafemenu.firebaseapp.com",
-‎        projectId: "rubycafemenu",
-‎        storageBucket: "rubycafemenu.firebasestorage.app",
-‎        messagingSenderId: "770833665554",
+    const firebaseConfig = {
+        apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
+        authDomain: "rubycafemenu.firebaseapp.com",
+        projectId: "rubycafemenu",
+        storageBucket: "rubycafemenu.firebasestorage.app",
+        messagingSenderId: "770833665554",
+        appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb",
+        measurementId: "G-0LFDSHD923"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Ürün Kaydetme
+    // Ürün Ekleme
     window.saveItem = async () => {
         const name = document.getElementById('pName').value;
         const cat = document.getElementById('pCat').value;
-        const img = document.getElementById('pImg').value || "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=200";
+        const img = document.getElementById('pImg').value || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200";
         if(name) {
             await addDoc(collection(db, "menu"), { name, category: cat, image: img });
-            alert("Ürün Menüye Eklelendi!");
             document.getElementById('pName').value = "";
+            alert("Ürün başarıyla eklendi!");
         }
     };
 
-    // Siparişleri Dinleme
+    // Siparişleri Canlı Dinle
     onSnapshot(query(collection(db, "orders"), orderBy("timestamp", "desc")), (snap) => {
         const list = document.getElementById('orderList');
         list.innerHTML = "";
         snap.forEach(d => {
-            const order = d.data();
-            const date = new Date(order.timestamp).toLocaleTimeString();
+            const o = d.data();
+            const time = new Date(o.timestamp).toLocaleTimeString();
             list.innerHTML += `
                 <div class="order-card">
-                    <strong>⏰ ${date} - Masa Siparişi</strong>
-                    <div class="item-list">${order.items.join(", ")}</div>
-                    <button class="delete-btn" onclick="completeOrder('${d.id}')">Tamamlandı / Sil</button>
+                    <span class="order-time">🕒 ${time}</span>
+                    <div class="order-items">${o.items.join(", ")}</div>
+                    <button class="done-btn" onclick="deleteOrder('${d.id}')">Tamamlandı ✓</button>
                 </div>`;
         });
     });
 
-    window.completeOrder = async (id) => {
-        if(confirm("Sipariş teslim edildi mi?")) await deleteDoc(doc(db, "orders", id));
-    };
+    // Menü Listesini Canlı Dinle
+    onSnapshot(collection(db, "menu"), (snap) => {
+        const list = document.getElementById('itemList');
+        list.innerHTML = "";
+        snap.forEach(d => {
+            const p = d.data();
+            list.innerHTML += `<div class="card" style="padding:10px; margin-bottom:5px;">
+                <span><b>${p.category}:</b> ${p.name}</span>
+                <button class="delete-item-btn" onclick="deleteItem('${d.id}')">Sil</button>
+            </div>`;
+        });
+    });
+
+    window.deleteOrder = async (id) => { await deleteDoc(doc(db, "orders", id)); };
+    window.deleteItem = async (id) => { if(confirm("Ürün menüden silinsin mi?")) await deleteDoc(doc(db, "menu", id)); };
 </script>
 </body>
 </html>
