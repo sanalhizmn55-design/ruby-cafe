@@ -3,47 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruby Cafe | QR Menü</title>
+    <title>Ruby Cafe | Menü</title>
     <style>
         :root { --ruby-green: #1b4332; --soft-white: #f8f9fa; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--soft-white); color: var(--ruby-green); margin: 0; padding-bottom: 80px; }
-        header { background: var(--ruby-green); color: white; padding: 25px; text-align: center; border-radius: 0 0 30px 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .category-title { padding: 10px 20px; margin-top: 20px; background: #e9ecef; font-weight: bold; border-left: 5px solid var(--ruby-green); }
-        .product-card { background: white; margin: 15px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
-        .product-card img { width: 80px; height: 80px; object-fit: cover; }
-        .product-info { padding: 10px; flex: 1; }
-        .add-btn { background: var(--ruby-green); color: white; border: none; padding: 8px 12px; border-radius: 20px; float: right; cursor: pointer; }
+        header { background: var(--ruby-green); color: white; padding: 30px; text-align: center; border-radius: 0 0 40px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .category-title { padding: 15px; margin-top: 20px; border-left: 6px solid var(--ruby-green); background: #e9ecef; font-weight: bold; }
+        .product-card { background: white; margin: 15px; border-radius: 15px; overflow: hidden; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
+        .product-card img { width: 100px; height: 100px; object-fit: cover; }
+        .product-info { padding: 15px; flex: 1; }
+        .add-btn { background: var(--ruby-green); color: white; border: none; border-radius: 20px; padding: 8px 15px; position: absolute; right: 10px; bottom: 10px; }
         
-        /* Sepet Çubuğu */
-        #cart-bar { position: fixed; bottom: 0; width: 100%; background: var(--ruby-green); color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; display: none; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 1000; overflow-y: auto; }
-        .modal-header { background: var(--ruby-green); color: white; padding: 20px; display: flex; justify-content: space-between; }
+        /* Sepet Alanı */
+        #cart-bar { position: fixed; bottom: 0; width: 100%; background: var(--ruby-green); color: white; padding: 15px; text-align: center; font-weight: bold; cursor: pointer; z-index: 100; }
+        .cart-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 200; overflow-y: auto; }
+        .cart-header { background: var(--ruby-green); color: white; padding: 20px; display: flex; justify-content: space-between; }
         .cart-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
-        .remove-btn { color: red; background: none; border: none; font-weight: bold; }
+        .remove-btn { color: #e63946; font-weight: bold; border: none; background: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 style="margin:0;">RUBY CAFE</h1>
-    <p style="margin:5px 0 0 0; opacity: 0.8;">Hoş Geldiniz</p>
+    <h1 style="margin:0; letter-spacing: 2px;">RUBY CAFE</h1>
+    <p style="opacity: 0.8;">Taze, Doğal ve Kaliteli</p>
 </header>
 
-<div id="menu-container">
-    </div>
+<div id="menu-area"></div>
 
 <div id="cart-bar" onclick="toggleCart(true)">
     🛒 Sepete Git (<span id="cart-count">0</span> Ürün)
 </div>
 
-<div id="cart-modal" class="modal">
-    <div class="modal-header">
-        <h3>Sepetiniz</h3>
-        <button onclick="toggleCart(false)" style="color:white; background:none; border:none; font-size:20px;">✕</button>
+<div id="cart-modal" class="cart-modal">
+    <div class="cart-header">
+        <h2>Sepetiniz</h2>
+        <button onclick="toggleCart(false)" style="background:none; border:none; color:white; font-size: 24px;">✕</button>
     </div>
-    <div id="cart-list"></div>
+    <div id="cart-items-list"></div>
     <div style="padding: 20px;">
-        <button onclick="confirmOrder()" style="width:100%; padding:15px; background:var(--ruby-green); color:white; border:none; border-radius:10px;">Siparişi Tamamla</button>
+        <button onclick="confirmOrder()" style="width: 100%; padding: 15px; background: var(--ruby-green); color: white; border: none; border-radius: 10px; font-size: 18px;">Siparişi Onayla</button>
     </div>
 </div>
 
@@ -51,80 +50,93 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR (Admin sayfasındakiyle aynı)
+    // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR
     const firebaseConfig = {
-        apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
-        authDomain: "rubycafemenu.firebaseapp.com",
-        projectId: "rubycafemenu",
-        storageBucket: "rubycafemenu.firebasestorage.app",
-        messagingSenderId: "770833665554",
-        appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb"
+        apiKey: "AIza...", 
+        authDomain: "ruby-...", 
+        projectId: "ruby-...", 
+        storageBucket: "ruby-...", 
+        messagingSenderId: "...", 
+        appId: "...",
+        measurementId: "..."
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     let cart = [];
 
-    // Verileri Kategorize Et ve Göster
+    // Menüyü Getir
     onSnapshot(collection(db, "menu"), (snapshot) => {
-        const container = document.getElementById('menu-container');
-        const groups = {};
+        const menuArea = document.getElementById('menu-area');
+        const items = {};
         snapshot.forEach(doc => {
             const p = doc.data();
-            if(!groups[p.category]) groups[p.category] = [];
-            groups[p.category].push(p);
+            if(!items[p.category]) items[p.category] = [];
+            items[p.category].push(p);
         });
 
-        container.innerHTML = "";
-        for(let cat in groups) {
-            container.innerHTML += `<div class="category-title">${cat}</div>`;
-            groups[cat].forEach(p => {
-                container.innerHTML += `
+        menuArea.innerHTML = "";
+        for(let cat in items) {
+            menuArea.innerHTML += `<div class="category-title">${cat}</div>`;
+            items[cat].forEach(p => {
+                menuArea.innerHTML += `
                     <div class="product-card">
                         <img src="${p.image}" alt="${p.name}">
                         <div class="product-info">
-                            <span style="font-weight:bold;">${p.name}</span>
-                            <button class="add-btn" onclick="addToCart('${p.name}')">Ekle</button>
+                            <h3>${p.name}</h3>
+                            <button class="add-btn" onclick="addToCart('${p.name}')">Ekle +</button>
                         </div>
                     </div>`;
             });
         }
     });
 
+    // Sepet Fonksiyonları
     window.addToCart = (name) => {
         cart.push(name);
-        renderCart();
-        document.getElementById('cart-bar').style.display = 'block';
+        updateCartUI();
     };
 
-    window.renderCart = () => {
+    window.updateCartUI = () => {
         document.getElementById('cart-count').innerText = cart.length;
-        const list = document.getElementById('cart-list');
+        const list = document.getElementById('cart-items-list');
         list.innerHTML = "";
         cart.forEach((item, index) => {
-            list.innerHTML += `<div class="cart-item"><span>${item}</span><button class="remove-btn" onclick="removeItem(${index})">SİL</button></div>`;
+            list.innerHTML += `
+                <div class="cart-item">
+                    <span>${item}</span>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">SİL</button>
+                </div>`;
         });
     };
 
-    window.removeItem = (index) => {
+    window.removeFromCart = (index) => {
         cart.splice(index, 1);
-        renderCart();
-        if(cart.length === 0) {
-            document.getElementById('cart-bar').style.display = 'none';
-            toggleCart(false);
-        }
+        updateCartUI();
     };
 
     window.toggleCart = (show) => {
         document.getElementById('cart-modal').style.display = show ? 'block' : 'none';
     };
 
-    window.confirmOrder = () => {
-        alert("Siparişiniz Hazırlanıyor!\nÜrünler: " + cart.join(", "));
+    window.confirmOrder = async () => {
+    if(cart.length === 0) return alert("Sepetiniz boş!");
+    
+    try {
+        await addDoc(collection(db, "orders"), {
+            items: cart,
+            timestamp: Date.now(),
+            status: "new"
+        });
+        alert("Siparişiniz başarıyla mutfağa iletildi!");
         cart = [];
-        renderCart();
+        updateCartUI();
         toggleCart(false);
-        document.getElementById('cart-bar').style.display = 'none';
+    } catch (e) {
+        alert("Hata oluştu, lütfen garsona bildiriniz.");
+    }
+};
+    
     };
 </script>
 </body>
