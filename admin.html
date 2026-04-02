@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby Admin | Yönetim</title>
+    <style>
+        body { font-family: sans-serif; background: #f8f9fa; color: #1b4332; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .list-item { background: white; margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px solid #eee; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 style="text-align: center;">Ruby Admin</h2>
+    <input type="text" id="pName" placeholder="Ürün Adı">
+    <select id="pCat">
+        <option value="Sıcak İçecekler">Sıcak İçecekler</option>
+        <option value="Soğuk İçecekler">Soğuk İçecekler</option>
+        <option value="Tatlılar">Tatlılar</option>
+    </select>
+    <input type="text" id="pImg" placeholder="Görsel Linki (Boş kalabilir)">
+    <button onclick="saveItem()">Menüye Ekle</button>
+</div>
+
+<div id="itemList" style="max-width: 400px; margin: 20px auto;"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR
+    ‎const firebaseConfig = {
+‎  apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
+‎  authDomain: "rubycafemenu.firebaseapp.com",
+‎  projectId: "rubycafemenu",
+‎  storageBucket: "rubycafemenu.firebasestorage.app",
+‎  messagingSenderId: "770833665554",
+‎  appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb",
+‎  measurementId: "G-0LFDSHD923"
+‎};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.saveItem = async () => {
+        const name = document.getElementById('pName').value;
+        const cat = document.getElementById('pCat').value;
+        const img = document.getElementById('pImg').value || "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=200";
+        if(name) {
+            await addDoc(collection(db, "menu"), { name, category: cat, image: img });
+            alert("Eklendi!");
+            document.getElementById('pName').value = "";
+        }
+    };
+
+    onSnapshot(collection(db, "menu"), (snap) => {
+        const list = document.getElementById('itemList');
+        list.innerHTML = "<h4>Mevcut Ürünler</h4>";
+        snap.forEach(d => {
+            const p = d.data();
+            list.innerHTML += `<div class="list-item"><span>${p.name} (${p.category})</span> <button onclick="deleteItem('${d.id}')" style="width:auto; padding:5px; background:red;">Sil</button></div>`;
+        });
+    });
+
+    window.deleteItem = async (id) => { if(confirm("Silinsin mi?")) await deleteDoc(doc(db, "menu", id)); };
+</script>
+</body>
+</html>
