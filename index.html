@@ -6,27 +6,22 @@
     <title>Ruby Cafe | Menü</title>
     <style>
         :root { --ruby: #1b4332; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--ruby); margin: 0; padding-bottom: 90px; }
-        header { background: var(--ruby); color: white; padding: 30px; text-align: center; border-radius: 0 0 40px 40px; }
-        .cat-title { padding: 15px; margin-top: 20px; background: #e9ecef; font-weight: bold; border-left: 6px solid var(--ruby); }
-        .product { background: white; margin: 12px; border-radius: 15px; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
-        .product img { width: 90px; height: 90px; object-fit: cover; }
-        .product-info { padding: 12px; flex: 1; }
-        .add-btn { background: var(--ruby); color: white; border: none; border-radius: 20px; padding: 8px 15px; float: right; cursor: pointer; }
-        
-        #cart-bar { position: fixed; bottom: 0; width: 100%; background: var(--ruby); color: white; padding: 18px; text-align: center; font-weight: bold; cursor: pointer; font-size: 18px; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 999; overflow-y: auto; }
-        .modal-h { background: var(--ruby); color: white; padding: 20px; display: flex; justify-content: space-between; }
-        .c-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--ruby); margin: 0; padding-bottom: 90px; }
+        header { background: var(--ruby); color: white; padding: 25px; text-align: center; border-radius: 0 0 30px 30px; }
+        .cat-title { padding: 12px; margin-top: 15px; background: #eee; font-weight: bold; border-left: 5px solid var(--ruby); }
+        .product { background: white; margin: 10px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; }
+        .product img { width: 80px; height: 80px; object-fit: cover; }
+        .product-info { padding: 10px; flex: 1; }
+        .add-btn { background: var(--ruby); color: white; border: none; border-radius: 15px; padding: 6px 12px; float: right; }
+        #cart-bar { position: fixed; bottom: 0; width: 100%; background: var(--ruby); color: white; padding: 20px; text-align: center; font-weight: bold; cursor: pointer; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; z-index: 1000; overflow-y: auto; }
+        .modal-h { background: var(--ruby); color: white; padding: 15px; display: flex; justify-content: space-between; }
+        .c-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1 style="margin:0; letter-spacing: 2px;">RUBY CAFE</h1>
-    <p style="margin:5px 0 0 0; opacity: 0.8;">Lezzetin Dijital Hali</p>
-</header>
-
+<header><h1>RUBY CAFE</h1></header>
 <div id="menu-area"></div>
 
 <div id="cart-bar" onclick="showCart(true)">🛒 Siparişi Tamamla (<span id="count">0</span>)</div>
@@ -34,7 +29,13 @@
 <div id="cart-modal" class="modal">
     <div class="modal-h"><h3>Sepetiniz</h3><button onclick="showCart(false)" style="color:white; background:none; border:none; font-size:25px;">✕</button></div>
     <div id="cart-list"></div>
-    <div style="padding: 20px;"><button onclick="sendOrder()" style="width:100%; padding:18px; background:var(--ruby); color:white; border:none; border-radius:12px; font-size:18px; font-weight:bold;">Siparişi Onayla</button></div>
+    <div style="padding: 20px;">
+        <label><b>Masa Seçiniz:</b></label>
+        <select id="tableNo" style="width:100%; padding:12px; margin:10px 0; border-radius:8px;">
+            <script>for(let i=1; i<=50; i++) document.write(`<option value="${i}">Masa ${i}</option>`);</script>
+        </select>
+        <button onclick="sendOrder()" style="width:100%; padding:15px; background:var(--ruby); color:white; border:none; border-radius:10px; font-weight:bold;">SİPARİŞİ ONAYLA</button>
+    </div>
 </div>
 
 <script type="module">
@@ -83,9 +84,10 @@
     window.showCart = (s) => { document.getElementById('cart-modal').style.display = s ? 'block' : 'none'; };
     
     window.sendOrder = async () => {
-        if(cart.length === 0) return;
-        await addDoc(collection(db, "orders"), { items: cart, timestamp: Date.now() });
-        alert("Siparişiniz başarıyla alındı!");
+        if(cart.length === 0) return alert("Sepet boş!");
+        const t = document.getElementById('tableNo').value;
+        await addDoc(collection(db, "orders"), { items: cart, table: t, timestamp: Date.now() });
+        alert("Sipariş Masaya İletildi!");
         cart = []; renderCart(); showCart(false);
     };
 </script>
