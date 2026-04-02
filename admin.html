@@ -33,15 +33,14 @@
     import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // BURAYA KENDİ CONFIG BİLGİLERİNİ YAPIŞTIR
-    ‎const firebaseConfig = {
-‎  apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
-‎  authDomain: "rubycafemenu.firebaseapp.com",
-‎  projectId: "rubycafemenu",
-‎  storageBucket: "rubycafemenu.firebasestorage.app",
-‎  messagingSenderId: "770833665554",
-‎  appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb",
-‎  measurementId: "G-0LFDSHD923"
-‎};
+    const firebaseConfig = {
+        apiKey: "AIzaSyARo0wIxjep0jYSr-jxnz4sUlZCao2eBCQ",
+        authDomain: "rubycafemenu.firebaseapp.com",
+        projectId: "rubycafemenu",
+        storageBucket: "rubycafemenu.firebasestorage.app",
+        messagingSenderId: "770833665554",
+        appId: "1:770833665554:web:ac4d20f20ad3c2e93d52cb"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
