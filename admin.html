@@ -10,11 +10,9 @@
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h2 { text-align: center; margin-top: 0; color: #2d6a4f; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #2d6a4f; }
-        .order-card { background: #fff; border-left: 6px solid #ffbc00; margin-top: 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
-        .order-time { font-size: 12px; color: #666; }
-        .order-items { font-weight: bold; margin: 10px 0; color: #333; font-size: 18px; }
+        button { background: #1b4332; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .order-card { background: #fff; border-left: 8px solid #e63946; margin-top: 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .order-items { font-weight: bold; margin: 10px 0; color: #333; font-size: 18px; border-top: 1px solid #eee; padding-top: 10px; }
         .done-btn { background: #2a9d8f; width: auto; padding: 8px 15px; }
         .delete-item-btn { background: #e63946; padding: 5px; font-size: 12px; width: auto; float: right; }
     </style>
@@ -24,7 +22,7 @@
 <div class="container">
     <div class="card">
         <h2>✨ Ürün Ekle</h2>
-        <input type="text" id="pName" placeholder="Ürün Adı (Örn: Ruby Steak)">
+        <input type="text" id="pName" placeholder="Ürün Adı">
         <select id="pCat">
             <option value="TATLILAR">TATLILAR</option>
             <option value="BREAKFAST">BREAKFAST</option>
@@ -45,14 +43,13 @@
             <option value="TÜRK KAHVESİ">TÜRK KAHVESİ</option>
             <option value="HOOKAH">HOOKAH</option>
         </select>
-        <input type="text" id="pImg" placeholder="Görsel Linki (Opsiyonel)">
+        <input type="text" id="pImg" placeholder="Görsel Linki">
         <button onclick="saveItem()">Menüye Ekle</button>
     </div>
 
     <h2>🔔 Gelen Siparişler</h2>
     <div id="orderList"></div>
 
-    <hr>
     <h2>📦 Mevcut Menü</h2>
     <div id="itemList"></div>
 </div>
@@ -74,7 +71,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Ürün Ekleme
     window.saveItem = async () => {
         const name = document.getElementById('pName').value;
         const cat = document.getElementById('pCat').value;
@@ -82,11 +78,10 @@
         if(name) {
             await addDoc(collection(db, "menu"), { name, category: cat, image: img });
             document.getElementById('pName').value = "";
-            alert("Ürün başarıyla eklendi!");
+            alert("Eklendi!");
         }
     };
 
-    // Siparişleri Canlı Dinle
     onSnapshot(query(collection(db, "orders"), orderBy("timestamp", "desc")), (snap) => {
         const list = document.getElementById('orderList');
         list.innerHTML = "";
@@ -95,14 +90,16 @@
             const time = new Date(o.timestamp).toLocaleTimeString();
             list.innerHTML += `
                 <div class="order-card">
-                    <span class="order-time">🕒 ${time}</span>
-                    <div class="order-items">${o.items.join(", ")}</div>
-                    <button class="done-btn" onclick="deleteOrder('${d.id}')">Tamamlandı ✓</button>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:20px; font-weight:bold;">📍 MASA ${o.table}</span>
+                        <span style="font-size:12px; color:#666;">🕒 ${time}</span>
+                    </div>
+                    <div class="order-items">${o.items.join("<br> • ")}</div>
+                    <button class="done-btn" onclick="deleteOrder('${d.id}')">Tamamlandı</button>
                 </div>`;
         });
     });
 
-    // Menü Listesini Canlı Dinle
     onSnapshot(collection(db, "menu"), (snap) => {
         const list = document.getElementById('itemList');
         list.innerHTML = "";
@@ -116,7 +113,7 @@
     });
 
     window.deleteOrder = async (id) => { await deleteDoc(doc(db, "orders", id)); };
-    window.deleteItem = async (id) => { if(confirm("Ürün menüden silinsin mi?")) await deleteDoc(doc(db, "menu", id)); };
+    window.deleteItem = async (id) => { if(confirm("Silinsin mi?")) await deleteDoc(doc(db, "menu", id)); };
 </script>
 </body>
 </html>
